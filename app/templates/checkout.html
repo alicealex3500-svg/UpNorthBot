@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ brand_name }} - Crypto Checkout</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">⚡ {{ brand_name or "UpNorthBot" }}</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a class="btn small" href="/#pricing">Pricing</a>
+  </div>
+</nav>
+
+<section class="checkout">
+  <h1>Crypto Checkout</h1>
+  <p>Plan: <b>{{ plan|upper }}</b> — Amount: <b>${{ amount }}</b></p>
+
+  <form action="/checkout/submit" method="post">
+    <input type="hidden" name="plan" value="{{ plan }}">
+    <input type="hidden" name="amount" value="{{ amount }}">
+
+    <label>Full Name</label>
+    <input name="full_name" required placeholder="Your full name">
+
+    <label>Email</label>
+    <input type="email" name="email" required placeholder="you@email.com">
+
+    <label>Telegram Username</label>
+    <input name="telegram_username" placeholder="@username">
+
+    <label>Crypto Network</label>
+    <select name="network" id="network" required>
+      <option value="USDT_TRC20">USDT TRC20</option>
+      <option value="USDT_BEP20">USDT BEP20</option>
+      <option value="BTC">Bitcoin</option>
+    </select>
+
+    <div class="payment-box">
+      <h3 id="wallet-title">USDT TRC20 Payment</h3>
+      <img id="qr-img" class="qr-img" src="{{ usdt_trc20_qr }}" alt="Payment QR Code">
+      <div class="wallet-address" id="wallet-address">{{ usdt_trc20 }}</div>
+      <button class="copy-btn" type="button" onclick="copyWallet()">Copy Address</button>
+      <p class="wallet-note">Send exactly <b>${{ amount }}</b> worth of the selected crypto/network, then paste your transaction hash below.</p>
+    </div>
+
+    <label>Transaction Hash / TxID</label>
+    <input name="tx_hash" required placeholder="Paste your transaction hash">
+
+    <button class="btn" type="submit">I Have Paid - Continue to Telegram</button>
+  </form>
+</section>
+
+<script>
+  const wallets = {
+    USDT_TRC20: {
+      title: "USDT TRC20 Payment",
+      address: "{{ usdt_trc20 }}",
+      qr: "{{ usdt_trc20_qr }}"
+    },
+    USDT_BEP20: {
+      title: "USDT BEP20 Payment",
+      address: "{{ usdt_bep20 }}",
+      qr: "{{ usdt_bep20_qr }}"
+    },
+    BTC: {
+      title: "Bitcoin Payment",
+      address: "{{ btc }}",
+      qr: "{{ btc_qr }}"
+    }
+  };
+
+  const networkSelect = document.getElementById("network");
+  const walletTitle = document.getElementById("wallet-title");
+  const walletAddress = document.getElementById("wallet-address");
+  const qrImg = document.getElementById("qr-img");
+
+  networkSelect.addEventListener("change", function () {
+    const selected = wallets[this.value];
+    walletTitle.textContent = selected.title;
+    walletAddress.textContent = selected.address;
+    qrImg.src = selected.qr;
+  });
+
+  function copyWallet() {
+    navigator.clipboard.writeText(walletAddress.textContent);
+    alert("Wallet address copied");
+  }
+</script>
+
+</body>
+</html>
